@@ -1,77 +1,49 @@
-const express = require('express');
-const connectDB = require('./db')
-const Product = require('./product');
+import express from "express"
+import { createServer } from "http";   
+import cors from "cors"
+const app=express()   
+const httpServer= createServer(app)
+import { Server } from "socket.io";
+ 
+app.use(express.json({ limit: "16kb" }));
+  
+// const io = new Server(httpServer, {
+//   pingTimeout: 60000,
+//   cors: {
+//     origin: process.env.CORS_ORIGIN,
+//     credentials: true,
+//   },
+// });
 
-const app = express();
-app.use(express.json());
+// app.set("io", io);
 
-connectDB();
-
-
-
-app.get('/products', async (req, res) => {
-    try {
-        const products = await Product.find();
-        res.json(products);
-    }
-    catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
-
-app.get('/products/:id', async (req, res) => {    //http://localhost:3000/products/1
-    try {
-        const product = await Product.findById(req.params.id);
-        if (!product) throw new Error('Product not found');
-        res.json(product);
-    }
-    catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
-
-
-app.post('/products', async (req, res) => {    //http://localhost:3000/products/1
-    try {
-        const {name, price, quantity} = req.body;
-        const product = new Product({name, price, quantity});
-        await product.save();
-        res.json({success: true});
-    }
-    catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
-
-app.put('/products/:id', async (req, res) => {    //http://localhost:3000/products/1
-    try {
-        const product = await Product.findByIdAndUpdate(req.params.id, req.body, {new: true});
-        if (!product) throw new Error('Product not found');
-        res.json({success: true});
-    }
-    catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
-
-app.delete('/products/:id', async (req, res) => {    //http://localhost:3000/products/1
-    try {
-        const product = await Product.findByIdAndDelete(req.params.id);
-        if (!product) throw new Error('Product not found');
-        res.json({success: true});
-    }
-    catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
-
-const port = 5000;
-
-app.listen(port, () => {
-    console.log("API server started on port 5000");
+app.use("/", (req, res)=>{
+  res.json("this is fish man")
 })
+app.use(
+   cors({
+     origin: process.env.CORS_ORIGIN,
+     credentials: true,
+   })
+ );
+
+//  const limiter = rateLimit({
+//    windowMs: 15 * 60 * 1000, // 15 minutes
+//    max: 500, // Limit each IP to 500 requests per `window` (here, per 15 minutes)
+//    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+//    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+//    handler: (_, __, ___, options) => {
+//      throw new ApiError(
+//        options.statusCode || 500,  
+//        `There are too many requests. You are only allowed ${
+//          options.max
+//        } requests per ${options.windowMs / 60000} minutes`
+//      );
+//    },
+//  });
+
+// app.use(limiter)
+
+// InitializeSocketIO(io);
+
+export { httpServer };
